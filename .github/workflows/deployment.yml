@@ -1,1 +1,41 @@
+name: HTML Creation on PR to Master
+
+on:
+pull_request:
+branches:
+- staging
+types:
+- opened
+
+jobs:
+createHTML:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout source code
+uses: actions/checkout@v2.3.4
+with:
+ref: ${{ github.head_ref }}
+
+
+- name: Installing dependencies
+  run: npm install
+
+- name: Creating HTML file
+  run: npm run create-html
+
+- name: Commit and push to master
+  uses: stefanzweifel/git-auto-commit-action@v4
+  with:
+    commit_message: "Created HTML file from JSON only"
+    commit_user_name: Github Actions
+    commit_user_email: actions@github.com
+
+- name: Push changes to origin
+  uses: ad-m/github-push-action@master
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    branch: main
+
+- name: Done!
+  run: echo "HTML file created and pushed to master!"
 
