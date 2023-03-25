@@ -1,1 +1,45 @@
 
+on:
+ push:
+   branches:
+       - development
+
+jobs:
+   read-json-and-create-html:
+                   runs-on: ubuntu-latest
+
+   steps:
+      - name: Checkout code
+       uses: actions/checkout@v2
+
+     - name: Read and parse JSON
+       id: read-json
+       run: |
+             echo "${{ github.event.inputs.json }}" > input.json
+             echo "$(<input.json)"
+             echo "::set-output name=json::$(cat input.json)"
+      shell: bash
+
+    - name: Generate HTML
+      uses: HecticScripts/json-to-html@v1.0
+      id: generate-html
+      with:
+          data: "${{ steps.read-json.outputs.json }}"
+      run: |
+          echo ${{ steps.generate-html.outputs.html }}
+          echo "${{ steps.generate-html.outputs.html }}" > output.html
+
+ - name: Write output files
+   id: write-files
+   run: |
+      echo "${{ steps.read-json.outputs.json }}" > output.json
+      echo "${{ steps.generate-html.outputs.html }}" > output.html
+ shell: bash
+
+- name: Upload artifacts
+  uses: actions/upload-artifact@v2
+  with:
+    name: Outputs
+    path: |
+      output.json
+      output.html
